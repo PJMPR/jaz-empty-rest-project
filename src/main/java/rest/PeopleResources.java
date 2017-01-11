@@ -3,6 +3,9 @@ package rest;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -19,20 +22,24 @@ import domain.Person;
 import domain.services.PersonService;
 
 @Path("/people")
+@Stateless
 public class PeopleResources {
 
 	private PersonService db = new PersonService();
 	
+	@PersistenceContext
+	EntityManager em;
+	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Person> getAll() {
-		return db.getAll();
+		return em.createNamedQuery("person.all", Person.class).getResultList();
 	}
 	
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response Add(Person person) {
-		db.add(person);
+		em.persist(person);
 		return Response.ok(person.getId()).build();
 	}
 	
@@ -40,7 +47,7 @@ public class PeopleResources {
 	@Path("/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response get(@PathParam("id") int id){
-		Person result = db.get(id);
+		Person result = em.createNamedQuery("person.id", Person.class).setParameter("personId", id).getSingleResult();
 		if(result==null){
 			return Response.status(404).build();
 		}
@@ -51,19 +58,20 @@ public class PeopleResources {
 	@Path("/{id}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response update(@PathParam("id") int id, Person p){
-		Person result = db.get(id);
+		Person result = em.createNamedQuery("person.id", Person.class).setParameter("personId", id).getSingleResult();
 		if(result==null){
 			return Response.status(404).build();
 		}
-		p.setId(id);
-		db.update(p);
+		result.setName(p.getName());
+		result.setSurname(p.getSurname());
+		em.persist(result);
 		return Response.ok().build();
 	}
 	
 	@DELETE
 	@Path("/{id}")
 	public Response delete(@PathParam("id") int id){
-		Person result = db.get(id);
+		Person result = em.createNamedQuery("person.id", Person.class).setParameter("personId", id).getSingleResult();
 		if(result==null){
 			return Response.status(404).build();
 		}
@@ -75,11 +83,9 @@ public class PeopleResources {
 	@Path("/{personId}/cars")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Car> getCars(@PathParam("personId") int personId){
-		Person result = db.get(personId);
+		Person result = em.createNamedQuery("person.id", Person.class).setParameter("personId", personId).getSingleResult();
 		if(result==null)
 			return null;
-		if(result.getCars()==null)
-			result.setCars(new ArrayList<Car>());
 		return result.getCars();
 	}
 	
@@ -87,12 +93,12 @@ public class PeopleResources {
 	@Path("/{id}/cars")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response addCar(@PathParam("id") int personId, Car car){
-		Person result = db.get(personId);
+		Person result = em.createNamedQuery("person.id", Person.class).setParameter("personId", personId).getSingleResult();
 		if(result==null)
 			return Response.status(404).build();
-		if(result.getCars()==null)
-			result.setCars(new ArrayList<Car>());
 		result.getCars().add(car);
+		car.setPerson(result);
+		em.persist(car);
 		return Response.ok().build();
 	}
 	
