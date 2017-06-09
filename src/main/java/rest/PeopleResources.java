@@ -14,10 +14,12 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import domain.Car;
+import domain.People;
 import domain.Person;
 import domain.services.PersonService;
 
@@ -32,8 +34,12 @@ public class PeopleResources {
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Person> getAll() {
-		return em.createNamedQuery("person.all", Person.class).getResultList();
+	public Response getAll() {
+		List<Person> result = em.createNamedQuery("person.all", Person.class).getResultList();
+		
+		People entity = new People();
+		entity.setPeople(result);
+		return Response.ok(entity).build();
 	}
 	
 	@POST
