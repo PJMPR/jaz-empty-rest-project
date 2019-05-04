@@ -23,8 +23,8 @@ import domain.People;
 import domain.Person;
 import domain.services.PersonService;
 
-@Path("/people")
-@Stateless
+//@Path("/people")
+//@Stateless
 public class PeopleResources {
 
 	private PersonService db = new PersonService();
@@ -53,7 +53,7 @@ public class PeopleResources {
 	@Path("/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response get(@PathParam("id") int id){
-		Person result = em.createNamedQuery("person.id", Person.class).setParameter("personId", id).getSingleResult();
+		Person result = db.get(id);
 		if(result==null){
 			return Response.status(404).build();
 		}

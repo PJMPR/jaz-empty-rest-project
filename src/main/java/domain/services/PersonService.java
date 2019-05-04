@@ -31,4 +31,7 @@ public class PersonService {
 			}
 		}
 	}
+	public void delete(Person p) {
+		db.remove(p);
+	}
 }
