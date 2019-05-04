@@ -29,11 +29,8 @@ public class PeopleResources {
 
 	private PersonService db = new PersonService();
 	
-	@PersistenceContext
 	EntityManager em;
 	
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
 	public Response getAll() {
 		List<Person> result = em.createNamedQuery("person.all", Person.class).getResultList();
 		
@@ -42,16 +39,11 @@ public class PeopleResources {
 		return Response.ok(entity).build();
 	}
 	
-	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
 	public Response Add(Person person) {
 		em.persist(person);
 		return Response.ok(person.getId()).build();
 	}
 	
-	@GET
-	@Path("/{id}")
-	@Produces(MediaType.APPLICATION_JSON)
 	public Response get(@PathParam("id") int id){
 		Person result = db.get(id);
 		if(result==null){
@@ -85,9 +77,6 @@ public class PeopleResources {
 		return Response.ok().build();
 	}
 	
-	@GET
-	@Path("/{personId}/cars")
-	@Produces(MediaType.APPLICATION_JSON)
 	public List<Car> getCars(@PathParam("personId") int personId){
 		Person result = em.createNamedQuery("person.id", Person.class).setParameter("personId", personId).getSingleResult();
 		if(result==null)
@@ -95,9 +84,6 @@ public class PeopleResources {
 		return result.getCars();
 	}
 	
-	@POST
-	@Path("/{id}/cars")
-	@Produces(MediaType.APPLICATION_JSON)
 	public Response addCar(@PathParam("id") int personId, Car car){
 		Person result = em.createNamedQuery("person.id", Person.class).setParameter("personId", personId).getSingleResult();
 		if(result==null)
